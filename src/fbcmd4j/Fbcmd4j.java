@@ -3,12 +3,14 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package fbcmd4j;
 
 import facebook4j.Facebook;
 import facebook4j.FacebookException;
 import java.net.MalformedURLException;
+import java.nio.file.NoSuchFileException;
+import java.util.InputMismatchException;
+import java.util.Scanner;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -22,19 +24,72 @@ public class Fbcmd4j {
      * @param args the command line arguments
      */
     private static final Logger logger = LogManager.getLogger(Fbcmd4j.class);
-    
+
     public static void main(String[] args) throws FacebookException, MalformedURLException {
-        logger.info("Inicializando app");
-        FacebookImp facebookImp = new FacebookImp();
-        logger.info("publicando desde la app");
-        facebookImp.Publish(facebookImp.facebook, "Este es un Mensaje Enviado desde Facebook4J");
-        logger.info("publicando url desde la app");
-        facebookImp.PublishURL(facebookImp.facebook);
-        logger.info("Obteniendo feed desde la app");
-        facebookImp.getFeed(facebookImp.facebook, "294564821251610");
-        logger.info("Obteniendo Home desde la app");
-        facebookImp.getHome(facebookImp.facebook);
-        logger.info("Finalizando app");
+        try (Scanner scanner = new Scanner(System.in)) {
+            while (true) {
+
+                logger.info("Inicializando app");
+                FacebookImp facebookImp = new FacebookImp();
+                // Inicio Menu
+                System.out.format("Simple Facebook client %s\n\n");
+                System.out.println("Opciones: ");
+                System.out.println("(0) Publicar POST");
+                System.out.println("(1) Publicar POST con URL");
+                System.out.println("(2) Traer Home");
+                System.out.println("(3) Traer Feed");
+                System.out.println("(4) Salir");
+                System.out.println("\nPor favor ingrese una opción: ");
+                // Fin de Menu
+                int seleccion;
+                try {
+                    seleccion = scanner.nextInt();
+                    scanner.nextLine();
+
+                    switch (seleccion) {
+                        case 0:
+                            logger.info("publicando desde la app");
+                            System.out.println("\nPor favor ingrese un Mensaje: ");
+                            String Message = scanner.nextLine();
+                            facebookImp.Publish(facebookImp.facebook, Message);
+                            break;
+                        case 1:
+                            logger.info("publicando url desde la app");
+                            facebookImp.PublishURL(facebookImp.facebook);
+                            break;
+                        case 2:
+                            logger.info("Obteniendo Home desde la app");
+                            facebookImp.getHome(facebookImp.facebook);
+                            break;
+                        case 3:
+                            logger.info("Obteniendo feed desde la app");
+                            System.out.println("\nPor favor ingrese el id de un Feed: ");
+                            String Feed = scanner.nextLine();
+                            facebookImp.getFeed(facebookImp.facebook, Feed);
+                            break;
+                        case 4:
+                            logger.info("Finalizando app");
+                            System.exit(0);
+                            break;
+
+                        default:
+                            logger.error("Opción inválida");
+                            break;
+                    }
+                } catch (InputMismatchException ex) {
+                    System.out.println("Ocurrió un errror, favor de revisar log.");
+                    logger.error("Opción inválida. %s. \n", ex.getClass());
+                    scanner.next();
+                } catch (Exception ex) {
+                    System.out.println("Ocurrió un errror, favor de revisar log.");
+                    logger.error(ex);
+                    scanner.next();
+                }
+            }
+        } catch (Exception ex) {
+            logger.error(ex);
+        }
+
     }
-    
+
 }
